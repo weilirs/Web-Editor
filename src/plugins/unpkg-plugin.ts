@@ -1,51 +1,24 @@
 import * as esbuild from 'esbuild-wasm'
-import axios from 'axios'
 
 export const unpkgPlugin = () => {
     return {
         name: 'unpkg-plugin',
         setup(build:esbuild.PluginBuild) {
-        build.onResolve({ filter: /.*/}, async (args:any) => {
-            console.log('onResolve', args);
-            if(args.path === 'index.js'){
-                return {path:args.path, namespace: 'a'}
-            }
-
-            if(args.path.includes('./') || args.path.includes('../')) {
-                return {
-                    namespace: 'a',
-                    path: new URL(
-                        args.path,
-                        "https://unpkg.com" + args.resolveDir + '/'
-                    ).href,
-                }
-            }
-
-            return {
-                namespace: 'a',
-                path: `https://unpkg.com/${args.path}`
-            }
+        build.onResolve({ filter: /(^index\.js$)/},  () => {
+            return {path:'index.js', namespace: 'a'};
+        })
+        
+        build.onResolve({ filter: /^\.+\//},  (args: any) => {
+            return {path:new URL(args.path, 'https://unpkg.com' + args.resolveDir + '/').href, namespace: 'a'};
         })
 
-    build.onLoad({filter: /.*/}, async (args: any) => {
-        console.log('onLoad', args);
-
-        if(args.path === 'index.js'){
+        build.onResolve({filter: /.*/}, async (args: any) => {
             return {
-                loader: 'jsx',
-                contents: `
-                    import axios from 'axios';
-                `
+                namespace: 'a',
+                path: `https://unpkg.com/${args.path}`,
             }
-        }
-
-        const {data,request} = await axios.get(args.path);
-        return {
-            loader:'jsx',
-            contents:data,
-            resolveDir: new URL('./', request.responseURL).pathname
-        }
-    })
-        }
+        
+        })
     }
+}
 }
