@@ -1,16 +1,16 @@
-import * as esbuild from "esbuild-wasm"
+import "bulmaswatch/superhero/bulmaswatch.min.css"
 import ReactDOM from "react-dom"
-import { useState, useEffect, useRef } from "react"
-import { unpkgPlugin } from "./bundler/plugins/unpkg-plugin"
-import { fetchPlugin } from "./bundler/plugins/fetch-plugin"
-import CodeEditor from "./components/code-editor"
-import CodeCell from "./components/code-cell"
+import { Provider } from "react-redux"
+import { store } from "./state"
+import TextEditor from "./components/text-editor"
 
 const App = () => {
   return (
-    <div>
-      <CodeCell />
-    </div>
+    <Provider store={store}>
+      <div>
+        <TextEditor />
+      </div>
+    </Provider>
   )
 }
 ReactDOM.render(<App />, document.querySelector("#root"))
